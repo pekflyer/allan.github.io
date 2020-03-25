@@ -1,71 +1,200 @@
-/*!
- * Clean Blog v1.0.0 (http://startbootstrap.com)
- * Copyright 2015 Start Bootstrap
- * Licensed under Apache 2.0 (https://github.com/IronSummitMedia/startbootstrap/blob/gh-pages/LICENSE)
- */
-
-// Tooltip Init
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-
-// responsive tables
-$(document).ready(function() {
-    $("table").each(function(){
-      if ($(this).parent().get(0).tagName != 'FIGURE') {
-        $(this).addClass("table table-responsive table-striped table-hover");
-        $(this).find("th").addClass("text-center");
-      }
-    });
-});
-
-// responsive embed videos
-$(document).ready(function () {
-    $('iframe[src*="youtube.com"]').wrap('<div class="embed-responsive embed-responsive-16by9"></div>');
-    $('iframe[src*="youtube.com"]').addClass('embed-responsive-item');
-    $('iframe[src*="vimeo.com"]').wrap('<div class="embed-responsive embed-responsive-16by9"></div>');
-    $('iframe[src*="vimeo.com"]').addClass('embed-responsive-item');
-    $('img').addClass('img-responsive-center')
-});
-
-// whether a post
-function isPages(attr){
-    var currentBoolean = document.querySelector('.navbar.header-navbar').getAttribute(attr);
-    if(currentBoolean === 'true'){return true;}
-    return false;
-}
 /*
-    scroll function
-    3 parameters
-        1. a DOM object
-        2 a class for targeted object
-        3 height when acctivated (optional. default: the height of the DOM)
+	Phantom by HTML5 UP
+	html5up.net | @n33co
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
-function scrollCheck(scrollTarget, toggleClass, scrollHeight){
-    document.addEventListener('scroll',function(){
-    var currentTop = window.pageYOffset;
-        currentTop > (scrollHeight||scrollTarget.clientHeight)
-        ?scrollTarget.classList.add(toggleClass)
-        :scrollTarget.classList.remove(toggleClass)
-    })
-}
 
+(function($) {
 
+	skel.breakpoints({
+		xlarge:	'(max-width: 1680px)',
+		large:	'(max-width: 1280px)',
+		medium:	'(max-width: 980px)',
+		small:	'(max-width: 736px)',
+		xsmall:	'(max-width: 480px)'
+	});
 
-/*
-* Steps
-* 1. get the content of h1
-* 2. scroll and appear fixed navbar
-* 3. the content of h1 is shown center at the top of the page
-* */
+	$(function() {
 
-(function(){
-    if (isPages('data-ispost')){
-        var navbar = document.querySelector('.navbar-custom');
-        var introHeader = document.querySelector('.intro-header').offsetHeight;
-        var introHeader = introHeader > 597 ? introHeader : 500;
-        var toc = document.querySelector('.toc-wrap');
-        scrollCheck(toc,'toc-fixed',introHeader-60);
-        // scrollCheck(navbar,'is-fixed');
-    }
-})();
+		var	$window = $(window),
+			$body = $('body');
+
+		// Disable animations/transitions until the page has loaded.
+			$body.addClass('is-loading');
+
+			$window.on('load', function() {
+				window.setTimeout(function() {
+					$body.removeClass('is-loading');
+				}, 100);
+			});
+
+		// Touch?
+			if (skel.vars.touch)
+				$body.addClass('is-touch');
+
+		// Forms.
+			var $form = $('form');
+
+			// Auto-resizing textareas.
+				$form.find('textarea').each(function() {
+
+					var $this = $(this),
+						$wrapper = $('<div class="textarea-wrapper"></div>'),
+						$submits = $this.find('input[type="submit"]');
+
+					$this
+						.wrap($wrapper)
+						.attr('rows', 1)
+						.css('overflow', 'hidden')
+						.css('resize', 'none')
+						.on('keydown', function(event) {
+
+							if (event.keyCode == 13
+							&&	event.ctrlKey) {
+
+								event.preventDefault();
+								event.stopPropagation();
+
+								$(this).blur();
+
+							}
+
+						})
+						.on('blur focus', function() {
+							$this.val($.trim($this.val()));
+						})
+						.on('input blur focus --init', function() {
+
+							$wrapper
+								.css('height', $this.height());
+
+							$this
+								.css('height', 'auto')
+								.css('height', $this.prop('scrollHeight') + 'px');
+
+						})
+						.on('keyup', function(event) {
+
+							if (event.keyCode == 9)
+								$this
+									.select();
+
+						})
+						.triggerHandler('--init');
+
+					// Fix.
+						if (skel.vars.browser == 'ie'
+						||	skel.vars.mobile)
+							$this
+								.css('max-height', '10em')
+								.css('overflow-y', 'auto');
+
+				});
+
+			// Fix: Placeholder polyfill.
+				$form.placeholder();
+
+		// Prioritize "important" elements on medium.
+			skel.on('+medium -medium', function() {
+				$.prioritize(
+					'.important\\28 medium\\29',
+					skel.breakpoint('medium').active
+				);
+			});
+
+		// Menu.
+			var $menu = $('#menu');
+
+			$menu.wrapInner('<div class="inner"></div>');
+
+			$menu._locked = false;
+
+			$menu._lock = function() {
+
+				if ($menu._locked)
+					return false;
+
+				$menu._locked = true;
+
+				window.setTimeout(function() {
+					$menu._locked = false;
+				}, 350);
+
+				return true;
+
+			};
+
+			$menu._show = function() {
+
+				if ($menu._lock())
+					$body.addClass('is-menu-visible');
+
+			};
+
+			$menu._hide = function() {
+
+				if ($menu._lock())
+					$body.removeClass('is-menu-visible');
+
+			};
+
+			$menu._toggle = function() {
+
+				if ($menu._lock())
+					$body.toggleClass('is-menu-visible');
+
+			};
+
+			$menu
+				.appendTo($body)
+				.on('click', function(event) {
+					event.stopPropagation();
+				})
+				.on('click', 'a', function(event) {
+
+					var href = $(this).attr('href');
+
+					event.preventDefault();
+					event.stopPropagation();
+
+					// Hide.
+						$menu._hide();
+
+					// Redirect.
+						if (href == '#menu')
+							return;
+
+						window.setTimeout(function() {
+							window.location.href = href;
+						}, 350);
+
+				})
+				.append('<a class="close" href="#menu">Close</a>');
+
+			$body
+				.on('click', 'a[href="#menu"]', function(event) {
+
+					event.stopPropagation();
+					event.preventDefault();
+
+					// Toggle.
+						$menu._toggle();
+
+				})
+				.on('click', function(event) {
+
+					// Hide.
+						$menu._hide();
+
+				})
+				.on('keydown', function(event) {
+
+					// Hide on escape.
+						if (event.keyCode == 27)
+							$menu._hide();
+
+				});
+
+	});
+
+})(jQuery);
